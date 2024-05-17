@@ -20,7 +20,8 @@ describe('install', () => {
 
   const workspaceOptions: WorkspaceOptions = {
     name: 'workspace',
-    version: '16.0.0'
+    // TODO: use angular latest-versions module
+    version: '12.0.0'
   };
 
   const angularSchematicsCollection = require.resolve('../../node_modules/@schematics/angular/collection.json');
@@ -28,13 +29,13 @@ describe('install', () => {
   let appTree: UnitTestTree;
 
   beforeEach(async () => {
-    appTree = await schematicRunner.runSchematic('workspace', workspaceOptions);
-    appTree = await schematicRunner.runSchematic('application', appOptions, appTree);
+    appTree = await schematicRunner.runSchematicAsync('workspace', workspaceOptions).toPromise();
+    appTree = await schematicRunner.runSchematicAsync('application', appOptions, appTree).toPromise();
   });
 
   it('should add devextreme dependency (default)', async () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', {}, appTree);
+    const tree = await runner.runSchematicAsync('install', {}, appTree).toPromise();
     const packageConfig = JSON.parse(tree.readContent('package.json'));
 
     expect(packageConfig.dependencies['devextreme']).toBe(latestVersions['devextreme']);
@@ -44,7 +45,7 @@ describe('install', () => {
 
   it('should add devextreme dependency (custom)', async () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', { dxversion: '18.2.5' }, appTree);
+    const tree = await runner.runSchematicAsync('install', { dxversion: '18.2.5' }, appTree).toPromise();
     const packageConfig = JSON.parse(tree.readContent('package.json'));
 
     expect(packageConfig.dependencies.devextreme).toBe('18.2.5');
@@ -53,7 +54,7 @@ describe('install', () => {
 
   it('should add devextreme cli devDependency', async () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', { dxversion: '18.2.5' }, appTree);
+    const tree = await runner.runSchematicAsync('install', { dxversion: '18.2.5' }, appTree).toPromise();
     const packageConfig = JSON.parse(tree.readContent('package.json'));
 
     expect(packageConfig.devDependencies['devextreme-cli']).toBeDefined();
@@ -61,7 +62,7 @@ describe('install', () => {
 
   it('should add devextreme styles', async () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', {}, appTree);
+    const tree = await runner.runSchematicAsync('install', {}, appTree).toPromise();
     const angularConfig = JSON.parse(tree.readContent('angular.json'));
     const styles = angularConfig['projects']['testApp']['architect']['build']['options']['styles'];
 
@@ -70,7 +71,7 @@ describe('install', () => {
 
   it('should register jszip', async () => {
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', {}, appTree);
+    const tree = await runner.runSchematicAsync('install', {}, appTree).toPromise();
     const tsconfig = JSON.parse(tree.readContent('tsconfig.app.json'));
     const jszip = tsconfig['compilerOptions']['paths']['jszip'];
 
@@ -89,10 +90,10 @@ describe('install', () => {
       skipPackageJson: false
     };
 
-    appTree = await schematicRunner.runSchematic('application', secondAppOptions, appTree);
+    appTree = await schematicRunner.runSchematicAsync('application', secondAppOptions, appTree).toPromise();
 
     const runner = new SchematicTestRunner('schematics', collectionPath);
-    const tree = await runner.runSchematic('install', { project: 'testApp2' }, appTree);
+    const tree = await runner.runSchematicAsync('install', { project: 'testApp2' }, appTree).toPromise();
     const angularConfig = JSON.parse(tree.readContent('angular.json'));
     const styles = angularConfig['projects']['testApp2']['architect']['build']['options']['styles'];
 
